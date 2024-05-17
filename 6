@@ -1,0 +1,9 @@
+# Calculate the median daily vaccinations per country
+median_vaccinations_per_country = df.groupby('country')['daily_vaccinations'].median()
+
+# Get the top-3 countries with the highest median daily vaccination numbers
+top_3_countries = median_vaccinations_per_country.nlargest(3)
+
+# Display the result
+print("Top 3 countries with highest median daily vaccination numbers:")
+print(top_3_countries)
