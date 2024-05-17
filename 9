@@ -1,0 +1,15 @@
+import pandas as pd
+import re
+
+# Define the regex pattern to extract the pure URL part within XML tags
+pattern = re.compile(r'<url>https?://([a-z0-9_.]+)</url>', re.IGNORECASE)
+
+# Function to extract the URL based on the regex pattern
+def extract_url(link):
+    match = pattern.search(link)
+    if match:
+        return match.group(1)
+    return None
+
+# Apply the function to the Stats_Access_Link column
+df['Pure_URL'] = df['Stats_Access_Link'].apply(extract_url)
