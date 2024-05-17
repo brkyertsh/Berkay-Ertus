@@ -1,0 +1,35 @@
+import sqlite3
+# Write the DataFrame to the SQLite database
+df.to_sql('vaccinations', conn, index=False, if_exists='replace')
+
+# Perform the SQL query to fill missing daily_vaccinations with the median per country
+query = """
+WITH country_medians AS (
+    SELECT
+        country,
+        COALESCE(
+            PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY daily_vaccinations) OVER (PARTITION BY country),
+            0
+        ) AS median_vaccinations
+    FROM vaccinations
+)
+UPDATE vaccinations
+SET daily_vaccinations = (
+    SELECT median_vaccinations
+    FROM country_medians
+    WHERE vaccinations.country = country_medians.country
+)
+WHERE daily_vaccinations IS NULL;
+"""
+
+# Execute the query
+conn.execute(query)
+
+# Load the updated data back into a DataFrame
+df_filled = pd.read_sql('SELECT * FROM vaccinations', conn)
+
+# Close the database connection
+conn.close()
+
+# Save the processed data to a new CSV file
+df_filled.to_csv('vaccinations_filled.csv', index=False)
