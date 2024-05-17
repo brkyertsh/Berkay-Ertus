@@ -1,0 +1,67 @@
+# Import necessary libraries
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.impute import SimpleImputer
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
+
+# Step 1: Load and Visualize the Data
+data = pd.read_csv('dataset.csv')
+print(data.head())
+print(data.info())
+
+# Visualize the distribution of the target variable
+plt.figure(figsize=(6, 4))
+sns.countplot(x='isVirus', data=data)
+plt.title('Distribution of Target Variable')
+plt.xlabel('isVirus')
+plt.ylabel('Count')
+plt.show()
+
+# Step 2: Data Preprocessing
+# Handle missing values
+imputer = SimpleImputer(strategy='mean')
+data[['feature_1', 'feature_2', 'feature_3', 'feature_4']] = imputer.fit_transform(data[['feature_1', 'feature_2', 'feature_3', 'feature_4']])
+
+# Address class imbalance
+# Assuming you have a function to balance the classes (e.g., oversampling, undersampling)
+
+# Step 3: Visualize the Cleaned Data
+# Visualize the distribution of features after handling missing values
+plt.figure(figsize=(10, 6))
+sns.pairplot(data, hue='isVirus')
+plt.show()
+
+# Step 4: Model Development
+# Split data into features and target variable
+X = data[['feature_1', 'feature_2', 'feature_3', 'feature_4']]
+y = data['isVirus']
+
+# Split data into training and test sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Initialize and train a Random Forest Classifier
+rf_classifier = RandomForestClassifier(random_state=42)
+rf_classifier.fit(X_train, y_train)
+
+# Step 5: Model Evaluation
+# Predict on the test set
+y_pred = rf_classifier.predict(X_test)
+
+# Evaluate the model
+print("Classification Report:")
+print(classification_report(y_test, y_pred))
+print("Confusion Matrix:")
+print(confusion_matrix(y_test, y_pred))
+print("Accuracy Score:", accuracy_score(y_test, y_pred))
+
+# Visualize the confusion matrix
+plt.figure(figsize=(6, 4))
+sns.heatmap(confusion_matrix(y_test, y_pred), annot=True, fmt='d', cmap='Blues')
+plt.xlabel('Predicted Labels')
+plt.ylabel('True Labels')
+plt.title('Confusion Matrix')
+plt.show()
