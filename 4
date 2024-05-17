@@ -1,0 +1,24 @@
+# Function to fill missing daily vaccinations
+def fill_missing_vaccinations(df):
+    # Calculate the minimum daily vaccinations per country
+    min_vaccinations_per_country = df.groupby('country')['daily_vaccinations'].min().fillna(0)
+
+    # Define a function to apply to each row
+    def impute_vaccinations(row):
+        if pd.isna(row['daily_vaccinations']):
+            if min_vaccinations_per_country[row['country']] == 0:
+                return 0
+            else:
+                return min_vaccinations_per_country[row['country']]
+        return row['daily_vaccinations']
+    
+    # Apply the function to fill missing values
+    df['daily_vaccinations'] = df.apply(impute_vaccinations, axis=1)
+
+    return df
+
+# Apply the function to the DataFrame
+df = fill_missing_vaccinations(df)
+
+# Display the DataFrame
+print(df)
